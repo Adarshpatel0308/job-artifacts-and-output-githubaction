@@ -18,6 +18,8 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      script-file: ${{ steps.publish.outputs.script-file }} # name of this totally depends on us (script_file) we can give any name to this,[steps - this is the special context value provided by github actions that provides all information about steps]
     steps:
       - name: Get code
         uses: actions/checkout@v3
@@ -25,7 +27,10 @@ jobs:
         run: npm ci
       - name: Build website
         run: npm run build
-      - name: Upload artifacts
+      - name: Publish JS filename
+        id: publish
+        run: find dist/assets/*.js -type f -execdir echo 'script-file={}' >> $GITHUB_OUTPUT ';' #This commad gives the name of the JS file, GITHUB_OUTPUT = what it does - it targets a file, a special file created by github in the environment in which our job runs and where the output key-value pair is written to. So, overall command simply writes the output to a file, a file which path is stored in this special variable, which provided by github actions. So this simply writes some data into some output file,managed by GitHub.
+      - name: Upload artifacts                                                                   # Alternative syntax for declaring this that was used previously [ run: find dist/assets/*.js -type f -execdir echo '::set-output name=script-file::{}' ';' ]
         uses: actions/upload-artifact@v4
         with:
           name: dist-files
@@ -43,5 +48,7 @@ jobs:
           name: dist-files
       - name: Output contents of dist
         run: ls
+      - name: Output filename
+        run: echo "${{ needs.buld.output.script-file }}"
       - name: Deploy
         run: echo "Deploying..."
