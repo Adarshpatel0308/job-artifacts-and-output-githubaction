@@ -9,6 +9,11 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm # Ham jab npm install run karte h to npm khud ek cache create karte h kyuki agar baad me ham fir se wahi use karein to dependencies ko reinstall na karna pade. Lekin github action workflows me har ek job different runner pe run karti h to ham npm me insatll dependencies ko reuse nahi kar sakte isliye ham path ke use se github action ko bata rahe h ki iss folder ko esi location pe store kar do jaha se ham isse reuse kar sake. Means in cache
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }} # And this key is used for retrieving the cache in future or in other jobs. And this (deps-node-modules) is not fixed we can change it by ourself.
       - name: Install dependencies
         run: npm ci
       - name: Lint code
@@ -23,6 +28,11 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install dependencies
         run: npm ci
       - name: Build website
